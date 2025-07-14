@@ -1,0 +1,32 @@
+---
+# tasks file for nginx_custom
+
+- name: Установка Nginx
+  apt:
+    update_cache: yes
+    name: "nginx"
+    state: present
+  when: "'vm_3' in inventory_hostname" # установка nginx на машину vm_3
+
+- name: Подмена веб-страницы
+  ansible.builtin.template:
+    src: index.j2
+    dest: /var/www/html/index.nginx-debian.html
+  when: "'vm_3' in inventory_hostname" # Выполнится только тогда, когда в имени есть vm_3
+  notify: "Nginx Reloader"
+
+- name: Меняем имя машины
+  shell: "echo {{ inventory_hostname }} > /etc/hostname"
+  when: (inventory_hostname != ansible_hostname) and ('vm_3' in inventory_hostname)
+
+- name: Добавление машины vm_3 в группу nginx
+  add_host:
+    name: vm_3
+    groups: nginx
+
+- name: Добавить хост в inventory файл
+  lineinfile:
+    path: ~/////////inventory.yaml
+    line: 'vm_3'
+    insertafter: '[nginx]'
+

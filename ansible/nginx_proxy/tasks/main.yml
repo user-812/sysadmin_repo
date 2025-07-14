@@ -1,0 +1,16 @@
+---
+# tasks file for nginx_proxy
+
+- name: Установка Nginx на машину vm_2
+  apt:
+    update_cache: yes
+    name: "nginx"
+    state: present
+  when: ('vm_2' in inventory_hostname) # установка nginx на машину vm_2
+
+- name: Подмена конфигурационного файла прокси-сервера на машине vm_2
+  ansible.builtin.template:
+    src: default
+    dest: /etc/nginx/sites-available/default
+  when: "'vm_2' in inventory_hostname" # Выполнится только тогда, когда в имени есть vm_2
+  notify: "Nginx Reloader"
